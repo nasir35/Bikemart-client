@@ -1,44 +1,19 @@
 import React from "react";
 
-const Order = ({ singleOrder }) => {
-  const { orderId, customerName, productImg, productName, price, orderStatus } =
-    singleOrder;
-  //UPDATE order status
-  const handleUpdate = (id) => {
-    const proceedToUpdate = window.confirm(
-      "Are you sure about shipping the order?"
-    );
-    if (proceedToUpdate) {
-      const url = `https://bikemart-server-side-nasir35.vercel.app/orders/${id}`;
-      fetch(url, {
-        method: "PUT",
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-        });
-    }
-  };
+const Order = ({ singleOrder, onUpdate, onDelete }) => {
+  const { name } = singleOrder.buyer;
+  const { name: productName, price, img } = singleOrder.products[0];
+  const { status } = singleOrder;
 
-  //DELETE an order
-  const handleDelete = (id) => {
-    const proceed = window.confirm(
-      "Are you sure, you want to cancel the order?"
-    );
-    if (proceed) {
-      const url = `https://bikemart-server-side-nasir35.vercel.app/orders/${id}`;
-      fetch(url, {
-        method: "DELETE",
-      })
-        .then((res) => res.json())
-        .then((result) => {
-          if (result.deletedCount == 1) {
-            alert("Order cancelled Successfully!");
-          }
-        });
-    }
-  };
-
+  let nextState =
+    status === "Processing"
+      ? "Shipped"
+      : status === "Shipped"
+      ? "Out for Delivery"
+      : status === "Out for Delivery"
+      ? "Delivered"
+      : "Delivered";
+  nextState = status === "Request Cancel" ? "Cancelled" : nextState;
   return (
     <div>
       <div
@@ -49,16 +24,20 @@ const Order = ({ singleOrder }) => {
           id="order-id-container"
           className="lg:col-span-3 px-2 col-span-12 flex lg:flex-col justify-between lg:border-0 border-b-2 border-gray-300"
         >
-          <h6 className="font-medium font-roboto">Order Id : {orderId}</h6>
-          <p className="font-roboto sm:block hidden">
-            Placed by: {customerName}
-          </p>
+          <h6 className="font-medium font-roboto">
+            Order Id : {singleOrder._id}
+          </h6>
+          <p className="font-roboto sm:block hidden">Placed by: {name}</p>
         </div>
         <div
           id="order-img-title-container"
           className="lg:col-span-6 col-span-8 sm:pl-3 pt-1 sm:flex hidden sm:space-x-2 space-x-1 items-center"
         >
-          <img src={productImg} alt="" className="h-16 rounded object-cover" />
+          <img
+            src={img}
+            alt="product image"
+            className="h-16 rounded object-cover"
+          />
           <div className="flex flex-col flex-grow lg:space-y-2 space-y-1">
             <h2 className="lg:text-xl text-lg font-roboto font-medium">
               {productName}
@@ -67,12 +46,12 @@ const Order = ({ singleOrder }) => {
               <p>{price}</p>
               <p
                 className={`font-qsand ${
-                  orderStatus.includes("pending")
+                  singleOrder.status.includes("Processing")
                     ? "text-coral"
                     : "text-green-custom"
                 }`}
               >
-                {orderStatus}
+                {singleOrder.status}
               </p>
             </div>
           </div>
@@ -84,20 +63,20 @@ const Order = ({ singleOrder }) => {
         </h2>
         <div className="col-span-8 sm:hidden px-1 flex items-center">
           <img
-            src={productImg}
-            alt=""
+            src={img}
+            alt="product image"
             className="h-16 rounded object-cover sm:hidden inline-block"
           />
           <div className="inline-block pl-2">
             <p className="text-gray-800 font-medium">{price}</p>
             <p
               className={`${
-                orderStatus.includes("pending")
+                singleOrder.status.includes("Processing")
                   ? "text-coral"
                   : "text-green-custom"
               }`}
             >
-              {orderStatus}
+              {singleOrder.status}
             </p>
           </div>
         </div>
@@ -109,15 +88,15 @@ const Order = ({ singleOrder }) => {
         >
           <button
             className="sm:px-3 px-2 sm:text-base text-sm bg-green-400 xl:w-auto w-3/4 text-gray-800 rounded font-medium py-1"
-            onClick={() => handleUpdate(singleOrder._id)}
+            onClick={() => onUpdate(singleOrder._id, { status: nextState })}
           >
-            Shipped
+            Next State
           </button>
           <button
             className="sm:px-3 px-2 sm:text-base text-sm bg-red-400 xl:w-auto w-3/4 text-gray-800 rounded font-medium py-1"
-            onClick={() => handleDelete(singleOrder._id)}
+            onClick={() => onDelete(singleOrder._id)}
           >
-            Cancel
+            Delete
           </button>
         </div>
       </div>

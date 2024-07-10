@@ -1,7 +1,9 @@
 import React from "react";
 import Rating from "../../../components/shared/Rating";
+import toast, { Toaster } from "react-hot-toast";
 
 const Product = ({ product }) => {
+  const bikemartToken = JSON.parse(localStorage.getItem("bikemartToken"));
   const { img, title, price, rating, ratedBy, description, bikeType } = product;
 
   //DELETE an order
@@ -10,14 +12,17 @@ const Product = ({ product }) => {
       "Are you sure, you want to Delete the product?"
     );
     if (proceed) {
-      const url = `https://bikemart-server-side-nasir35.vercel.app/products/${id}`;
+      const url = `https://bikemart-server-side.vercel.app/api/v1/products/${id}`;
       fetch(url, {
         method: "DELETE",
+        headers: {
+          authorization: `Bearer ${bikemartToken}`,
+        },
       })
         .then((res) => res.json())
         .then((result) => {
-          if (result.deletedCount == 1) {
-            alert("Product Deleted Successfully!");
+          if (result.status === "success") {
+            toast.success("Product Deleted Successfully!");
           }
         });
     }
@@ -25,7 +30,8 @@ const Product = ({ product }) => {
 
   return (
     <div className="p-3 border rounded shadow-inset bg-white space-y-2">
-      <img src={img} alt="" className="" />
+      <Toaster />
+      <img src={img} alt="" className="max-h-[180px]" />
       <h2 className="text-xl font-medium font-roboto text-coral">{title}</h2>
       <div className="flex justify-between sm:text-base text-sm">
         <p className="font-medium text-stromboli">

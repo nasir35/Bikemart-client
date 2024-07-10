@@ -22,6 +22,9 @@ import PrivateRoute from "../pages/Login/PrivateRoute";
 import ProductDetails from "../pages/PlaceOrder/ProductDetails";
 import ConfirmAccount from "../pages/Login/ConfirmAccount";
 import VerificationSuccess from "../pages/Login/VerificationSuccess";
+import PlaceOrder from "../pages/PlaceOrder/PlaceOrder";
+import BlogDetails from "../pages/Blog/BlogDetails";
+import PublicRoute from "../pages/Login/PublicRoute";
 
 const router = createBrowserRouter([
   {
@@ -46,12 +49,28 @@ const router = createBrowserRouter([
         element: <Blog />,
       },
       {
+        path: "/placed-order",
+        element: <PlaceOrder />,
+      },
+      {
+        path: "/blogs/:id",
+        element: <BlogDetails />,
+      },
+      {
         path: "/login",
-        element: <Login />,
+        element: (
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        ),
       },
       {
         path: "/register",
-        element: <Register />,
+        element: (
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        ),
       },
       {
         path: "/register/confirmation/:email",

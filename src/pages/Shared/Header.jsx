@@ -1,9 +1,8 @@
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { Link, NavLink } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 const Header = () => {
   const { user, logOut, isLoading } = useAuth() || {};
-
   const btn = useRef();
   const menu = useRef();
 
@@ -12,8 +11,8 @@ const Header = () => {
   };
 
   let name = "UnKnown";
-  if (isLoading === false && user?.displayName !== undefined) {
-    name = user?.displayName;
+  if (isLoading === false && user?.name !== undefined) {
+    name = user?.name;
     if (name?.length > 10 && name?.includes(" ")) {
       const nameParts = name?.split(" ");
       if (nameParts?.length > 1 && nameParts[0]?.length <= 3) {
@@ -22,7 +21,7 @@ const Header = () => {
         name = nameParts[0];
       }
     } else {
-      name = user?.displayName;
+      name = user?.name;
     }
   }
 

@@ -15,36 +15,36 @@ const useFirebase = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [authError, setAuthError] = useState("");
   const [admin, setAdmin] = useState(false);
-  const [savingUser, setSavingUser] = useState(false);
 
   const auth = getAuth(app);
 
   const registerUser = async (email, password, name, photoURL, navigate) => {
     setIsLoading(true);
     setAuthError("");
-    setSavingUser(true);
     try {
-      const result = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      await updateProfile(auth.currentUser, {
-        displayName: name,
-        photoURL: photoURL,
-      });
-      try {
-        const savedUser = await saveUser(email, password, name, photoURL);
-        if (savedUser.status === 200) {
-          setSavingUser(false);
+      const savedUser = await saveUser(email, password, name, photoURL);
+      if (savedUser.status === 200) {
+        try {
+          const result = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+          );
+          if (result) {
+            navigate(`/register/confirmation/${email}`);
+          }
+        } catch (error) {
+          setAuthError(error.message);
+          console.log(error);
         }
-        navigate(`/register/confirmation/${email}`);
-      } catch (error) {
-        setAuthError(error?.message);
       }
     } catch (error) {
-      setAuthError(error.message);
-      console.log(error);
+      console.log(error?.response?.data?.error);
+      if (error?.response?.data?.error?.errors?.email?.message) {
+        setAuthError(error?.response?.data?.error?.errors?.email?.message);
+      } else {
+        setAuthError(error?.response?.data?.error?.message);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -52,7 +52,6 @@ const useFirebase = () => {
 
   const loginUser = async (email, password, location, navigate) => {
     setIsLoading(true);
-    setSavingUser(true);
     try {
       const response = await axios.post(
         `https://bikemart-server-side.vercel.app/api/v1/users/login`,
@@ -86,55 +85,48 @@ const useFirebase = () => {
       }
     } finally {
       setIsLoading(false);
-      setSavingUser(false);
     }
   };
 
   // observer user state
   useEffect(() => {
     const bikemartToken = JSON.parse(localStorage.getItem("bikemartToken"));
-    fetch(
-      `https://bikemart-server-side.vercel.app/api/v1/users/${user.email}`,
-      {
-        headers: {
-          authorization: `Bearer ${bikemartToken}`,
-        },
-      }
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-      });
-    const unsubscribed = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-        setAdmin(true);
+    const unsubscribed = onAuthStateChanged(auth, (userCredentials) => {
+      if (userCredentials) {
+        setIsLoading(true);
+        fetch(
+          `https://bikemart-server-side.vercel.app/api/v1/users/${userCredentials?.email}`,
+          {
+            headers: {
+              authorization: `Bearer ${bikemartToken}`,
+            },
+          }
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            setUser(data?.data);
+            if (data?.data?.role === "admin") {
+              setAdmin(true);
+            }
+            setIsLoading(false);
+          })
+          .catch(() => {
+            setIsLoading(false);
+          });
       } else {
         setUser({});
+        setIsLoading(false);
       }
-      setIsLoading(false);
     });
     return () => unsubscribed;
-  }, [auth]);
-
-  useEffect(() => {
-    if (user?.email && !savingUser) {
-      fetch(
-        `https://bikemart-server-side.vercel.app/api/v1/users/${user.email}`
-      )
-        .then((res) => res.json())
-        .then((data) => {
-          if (data?.data?.role === "admin") setAdmin(true);
-          else setAdmin(false);
-        });
-    }
-  }, [user?.email]);
+  }, [auth, user?.email]);
 
   const logOut = () => {
     setIsLoading(true);
     signOut(auth)
       .then(() => {
         setUser({});
+        localStorage.removeItem("bikemartToken");
       })
       .catch((error) => {
         // An error happened.

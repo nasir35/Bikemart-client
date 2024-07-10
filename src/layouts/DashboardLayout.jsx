@@ -233,7 +233,7 @@ const DashboardLayout = () => {
         >
           <div className="flex flex-col items-center">{drawer}</div>
         </div>
-        <div className="lg:col-span-10 col-span-9">
+        <div className="lg:col-span-10 md:col-span-9 col-span-12">
           <Outlet />
         </div>
       </div>

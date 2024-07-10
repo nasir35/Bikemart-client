@@ -1,44 +1,39 @@
-import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import useAuth from "../../../hooks/useAuth";
+import toast, { Toaster } from "react-hot-toast";
 
 const MakeAdmin = () => {
   const { register, handleSubmit, reset } = useForm();
-  const { token } = useAuth();
-  const [success, setSuccess] = useState("");
+  const bikemartToken = JSON.parse(localStorage.getItem("bikemartToken"));
 
   const onSubmit = (data) => {
-    fetch("https://bikemart-server-side.vercel.app/api/v1/users/admin", {
-      method: "PUT",
-      headers: {
-        authorization: `Bearer ${token}`,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(data),
-    })
+    fetch(
+      `https://bikemart-server-side.vercel.app/api/v1/users/${data.email}`,
+      {
+        method: "PATCH",
+        headers: {
+          authorization: `Bearer ${bikemartToken}`,
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({ role: "admin" }),
+      }
+    )
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
-        if (data.modifiedCount) {
-          console.log(data);
-          setSuccess("Made Admin successfully!");
-          reset();
-        } else if (
-          data.acknowledged &&
-          data.modifiedCount === 0 &&
-          data.matchedCount === 1
-        ) {
-          setSuccess("OOPS! The user is Already an Admin!");
-          reset();
-        } else if (data.acknowledged && data.matchedCount === 0) {
-          setSuccess("Failed! there is no account associated with this email!");
+        if (data.status === "success") {
+          toast.success("Made Admin successfully!");
           reset();
         }
+      })
+      .catch((error) => {
+        console.log(error);
+        toast.error("An error occured!");
       });
   };
 
   return (
     <div className="my-4">
+      <Toaster />
       <div className="text-center">
         <h2 className="inline-block border-coral text-stromboli text-2xl px-4 border-b-4 rounded font-semibold font-qsand">
           Make Admin
@@ -64,15 +59,6 @@ const MakeAdmin = () => {
             className="px-10 mb-3 py-1 rounded cursor-pointer bg-green-custom text-white text-xl"
           />
         </form>
-        <p
-          className={`underline ${
-            success?.includes("successfully")
-              ? "text-green-custom"
-              : "text-coral"
-          }`}
-        >
-          {success}
-        </p>
       </div>
     </div>
   );

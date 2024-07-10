@@ -1,52 +1,7 @@
 import React from "react";
 import Rating from "../../../components/shared/Rating";
 
-const SingleReview = ({ reviewObj }) => {
-  const handlePending = (id) => {
-    const proceedToUpdate = window.confirm(
-      "Are you sure about changing the review status to pending?"
-    );
-    if (proceedToUpdate) {
-      const url = `https://bikemart-server-side-nasir35.vercel.app/reviews/pending/${id}`;
-      fetch(url, {
-        method: "PUT",
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-        });
-    }
-  };
-  const handlePublish = (id) => {
-    const proceedToUpdate = window.confirm(
-      "Are you sure about publishing the review?"
-    );
-    if (proceedToUpdate) {
-      const url = `https://bikemart-server-side-nasir35.vercel.app/reviews/publish/${id}`;
-      fetch(url, {
-        method: "PUT",
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-        });
-    }
-  };
-  const handleDelete = (id) => {
-    const proceedToUpdate = window.confirm(
-      "Are you sure about deleting the review?"
-    );
-    if (proceedToUpdate) {
-      const url = `https://bikemart-server-side-nasir35.vercel.app/reviews/${id}`;
-      fetch(url, {
-        method: "DELETE",
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-        });
-    }
-  };
+const SingleReview = ({ reviewObj, handleDelete, handleUpdate }) => {
   const { img, name, profession, review, rating } = reviewObj;
   return (
     <div className=" bg-white border rounded-xl shadow mx-2 relative">
@@ -88,14 +43,14 @@ const SingleReview = ({ reviewObj }) => {
           {reviewObj?.reviewStatus === "Published" ? (
             <button
               className="px-4 py-0.5 rounded bg-coral text-white"
-              onClick={() => handlePending(reviewObj._id)}
+              onClick={() => handleUpdate(reviewObj._id, "Pending")}
             >
               Pending
             </button>
           ) : (
             <button
               className="px-4 py-0.5 rounded bg-green-custom text-white"
-              onClick={() => handlePublish(reviewObj._id)}
+              onClick={() => handleUpdate(reviewObj._id, "Published")}
             >
               Publish
             </button>

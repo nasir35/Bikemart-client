@@ -10,6 +10,7 @@ const ConfirmAccount = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [canResend, setCanResend] = useState(false);
+  const [tokenCount, setTokenCount] = useState(0);
   const [resendMessage, setResendMessage] = useState("");
   const [timeRemainingInSec, setTimeRemainingInSec] = useState(0);
 
@@ -19,6 +20,7 @@ const ConfirmAccount = () => {
         const response = await axios.get(
           `https://bikemart-server-side.vercel.app/api/v1/users/signup/token-expiry/${email}`
         );
+        setTokenCount(response.data.confirmationTokenRequestCount);
         const expiryTime = response.data.expiryTime;
         const now = new Date(Date.now());
         const expiryDate = new Date(expiryTime);
@@ -61,7 +63,8 @@ const ConfirmAccount = () => {
       );
 
       setResendMessage(response.data.message);
-      setTimeRemainingInSec(600); // Reset timer to 10 minutes (600 seconds)
+      if (tokenCount < 3) setTimeRemainingInSec(600);
+      else setTimeRemainingInSec(24 * 60 * 60);
       setCanResend(false);
     } catch (error) {
       setResendMessage(error.response?.data?.message || "An error occurred");

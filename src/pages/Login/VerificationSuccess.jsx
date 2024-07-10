@@ -11,10 +11,6 @@ const VerificationSuccess = () => {
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
 
-  const handleLoginRedirect = () => {
-    navigate("/login");
-  };
-
   useEffect(() => {
     const verifyAccount = async () => {
       try {
@@ -23,23 +19,25 @@ const VerificationSuccess = () => {
         );
         if (response.status === 200) {
           setVerified(true);
+          toast.success("Your account verified successfully.");
+          setEmail(response.data?.user?.email);
+          setTimeout(() => {
+            navigate("/login");
+          }, 2000);
         }
-
-        toast.success("Your account verified successfully.");
-
-        setEmail(response.data?.data?.email);
       } catch (error) {
         console.log(error);
-        toast.error(error.response.data.error);
+        toast.error(error.response?.data?.error);
         setVerified(false);
-        setEmail(error.response.data.email);
+        setEmail(error?.response?.data?.user?.email);
       } finally {
         setIsLoading(false);
       }
     };
 
     verifyAccount();
-  }, []);
+    console.log("useeffect runninng");
+  }, [token]);
 
   return (
     <>
@@ -52,15 +50,9 @@ const VerificationSuccess = () => {
               Verification Successful
             </h2>
             <p className="mb-6">
-              Your account has been successfully verified. You can now log in
-              and start using our services.
+              Your account has been successfully verified.You are redirecting to
+              the login page. Please login to continue!
             </p>
-            <button
-              onClick={handleLoginRedirect}
-              className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline hover:bg-blue-700 transition duration-300"
-            >
-              Go to Login
-            </button>
           </div>
         </div>
       ) : (

@@ -1,17 +1,48 @@
-import React, { useEffect, useState } from "react";
-import useAuth from "../../../hooks/useAuth";
+import { useEffect, useState } from "react";
 import SingleOrder from "./SingleOrder";
+import toast from "react-hot-toast";
 
 const MyOrders = () => {
-  const { user } = useAuth();
+  const bikemartToken = JSON.parse(localStorage.getItem("bikemartToken"));
   const [orders, setOrders] = useState([]);
-  useEffect(() => {
-    fetch("https://bikemart-server-side.vercel.app/api/v1/orders/myorders")
+  const fetchOrders = () => {
+    fetch("https://bikemart-server-side.vercel.app/api/v1/orders/myorders", {
+      headers: {
+        authorization: `Bearer ${bikemartToken}`,
+      },
+    })
       .then((res) => res.json())
       .then((data) => {
         setOrders(data.data);
       });
-  }, [orders]);
+  };
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const handleAction = (id) => {
+    const proceed = window.confirm(
+      "Are you sure, you want to cancel the order?"
+    );
+    if (proceed) {
+      const url = `https://bikemart-server-side.vercel.app/api/v1/orders/myorder/${id}`;
+      fetch(url, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${bikemartToken}`,
+        },
+        body: JSON.stringify({ status: "Request Cancel" }),
+      })
+        .then((res) => res.json())
+        .then((result) => {
+          if (result?.status === "success") {
+            toast.success("Order Cancellation request placed successfully!");
+            fetchOrders();
+          }
+        });
+    }
+  };
 
   return (
     <div className="p-3 lg:px-12 md:px-6">
@@ -29,7 +60,11 @@ const MyOrders = () => {
       </div>
       <div className="space-y-3">
         {orders?.map((order) => (
-          <SingleOrder key={order._id} singleOrder={order}></SingleOrder>
+          <SingleOrder
+            key={order._id}
+            singleOrder={order}
+            action={handleAction}
+          ></SingleOrder>
         ))}
       </div>
     </div>

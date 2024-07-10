@@ -7,6 +7,7 @@ const GiveReview = () => {
   const { user } = useAuth();
   const { register, handleSubmit, reset } = useForm();
   const [rating, setRating] = useState(null);
+  const bikemartToken = JSON.parse(localStorage.getItem("bikemartToken"));
 
   const onSubmit = (data) => {
     data.rating = rating ? rating : "4";
@@ -19,12 +20,13 @@ const GiveReview = () => {
       method: "POST",
       headers: {
         "content-type": "application/json",
+        authorization: `Bearer ${bikemartToken}`,
       },
       body: JSON.stringify(data),
     })
       .then((res) => res.json())
       .then((result) => {
-        if (result.insertedId) {
+        if (result.status === "success") {
           toast.success("Thanks for giving a review!");
           reset();
         } else {
@@ -52,8 +54,8 @@ const GiveReview = () => {
             className="block w-full border-2 rounded px-3 py-1 mb-3"
             placeholder="Your Name"
             id="name"
-            defaultValue={user?.displayName}
-            disabled
+            defaultValue={user?.name}
+            readOnly
           />
           <input
             type="text"

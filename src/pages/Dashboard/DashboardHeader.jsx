@@ -25,7 +25,7 @@ const DashboardHeader = ({ btn, handleSideMenu }) => {
           {admin ? "Admin panel" : "User panel"}
         </h2>
       </div>
-      <div className="col-span-4 md:flex hidden justify-end items-center space-x-2">
+      <div className="lg:col-span-4 col-span-3 md:flex hidden justify-end items-center space-x-2">
         {/* <h2 className=""><i className="fas fa-bell"></i> Notifications</h2> */}
         <img
           src={user?.photoURL}

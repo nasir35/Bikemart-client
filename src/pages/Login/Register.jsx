@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { NavLink, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
+import toast, { Toaster } from "react-hot-toast";
 
 const Register = () => {
   const [isPassMatched, setIsPassMatched] = useState("");
@@ -20,11 +21,18 @@ const Register = () => {
     }
     const { email, password, name, photoURL } = data;
     registerUser(email, password, name, photoURL, navigate);
-    reset();
+    if (!authError) reset();
   };
+
+  useEffect(() => {
+    if (authError) {
+      toast.error(authError, { duration: 4000 });
+    }
+  }, [authError]);
 
   return (
     <>
+      <Toaster />
       <div className="xl:px-10 lg:px-8 md:px-4 px-3 py-4 grid grid-cols-12 bg-gray-300 justify-center items-center">
         <div id="img-container" className="md:col-span-5 col-span-12">
           <img

@@ -6,12 +6,13 @@ import Rating from "../../../components/shared/Rating";
 const AddProduct = () => {
   const [rating, setRating] = useState(null);
   const { register, handleSubmit, reset } = useForm();
-
+  const bikemartToken = JSON.parse(localStorage.getItem("bikemartToken"));
   const onSubmit = (data) => {
     data.rating = rating ? rating : "4";
     fetch("https://bikemart-server-side.vercel.app/api/v1/products", {
       method: "POST",
       headers: {
+        authorization: `bearer ${bikemartToken}`,
         "content-type": "application/json",
       },
       body: JSON.stringify(data),
@@ -19,7 +20,7 @@ const AddProduct = () => {
       .then((res) => res.json())
       .then((result) => {
         console.log(result);
-        if (result.insertedId) {
+        if (result.status === "success") {
           toast.success("Product added successfully!");
           reset();
         } else {
